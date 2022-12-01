@@ -1,0 +1,6 @@
+{
+ "apiPathLogin": "http://10.10.4.155:5001/logowania",
+ "apiPathUser": "http://10.10.4.155:5001/pracownicy",
+ "appName": "Plum!: 0.4",
+ "machineName": "AdminTest"
+}
