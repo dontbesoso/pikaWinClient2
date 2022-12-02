@@ -1,18 +1,15 @@
-import time
-
 from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QLabel, QLineEdit)
 from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
 import re
-from config import Config
-from logowanie import logowanie
+
+from rejestracja import rejestracja
 
 class logownik(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self.interface()
-        self.config = Config()
+
 
     def interface(self):
         self.etykietaName = QLabel("Logowanie czesu pracy", self)
@@ -43,7 +40,7 @@ class logownik(QWidget):
         pattern = re.compile(r"\b[0]\d{9}\b")
 
         if pattern.match(inputText):
-            logowanie(self.config, inputText)
+            rejestracja(inputText)
 
 
         self.inputCard.setText('')

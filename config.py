@@ -6,7 +6,7 @@ class Config:
         configData = json.load(configFile)
         configFile.close()
 
-        self.apiPathLogowanie = (configData['apiPathLogin'])
+        self.apiPathLogin = (configData['apiPathLogin'])
         self.apiPathUser = (configData['apiPathUser'])
         self.appName = (configData['appName'])
         self.machineName = (configData['machineName'])
