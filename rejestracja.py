@@ -21,11 +21,10 @@ class rejestracja:
             'type': "INSTART",
             'prevId': 0,
             'sessionId': 0,
-            'machineName': 'AdminTest' #self.config['machineName']
+            'machineName': self.config.machineName
         }
 
         print(f"Biezace logowanie: {self.biezaceLogowanie}")
-
         self.report()
 
     def report(self):
@@ -89,8 +88,6 @@ class rejestracja:
             self.biezaceLogowanie['prevId'] = 0
             self.biezaceLogowanie['sessionId'] = 0
 
-        #print("Ostatnie logowanie: ", self.ostatnieLogowanie)
-
     def sendRequestToApi(self):
         try:
             postRequest = requests.post(self.config.apiPathLogin, json=self.biezaceLogowanie)
@@ -118,9 +115,6 @@ class rejestracja:
                         + ";" + self.biezaceLogowanie['timeIn'][:10] \
                         + ";" + self.biezaceLogowanie['timeIn'][-8:] \
                         + ";" + self.biezaceLogowanie['machineName']
-
-        #print("Self.txt_log: ", txtLog)
-        #print("Dane wykonanego logowania: ", self.biezaceLogowanie)
 
     def showNotification(self):
         notification.notify(
