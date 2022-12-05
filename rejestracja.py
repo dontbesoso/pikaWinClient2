@@ -4,7 +4,7 @@ from plyer import notification
 from config import Config
 
 class rejestracja:
-    def __init__(self, cardKey, report_method="file"):
+    def __init__(self, cardKey, report_method="api"):
 
         self.config = Config()
         self.report_method = report_method
@@ -40,27 +40,27 @@ class rejestracja:
             self.sendRequestToFile()
 
     def getUserInfoFromApi(self):
-        getUserRequest = requests.get(self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie.get(['userid']))
-        print("Api o użytkonwiku: ", self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie.get(['userid']))
+        getUserRequest = requests.get(self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie['userid'])
+        print("Api o użytkonwiku: ", self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie['userid'])
 
-        getUserFirst = requests.get(self.config.apiPathLogowanie + '?userid=' + self.biezaceLogowanie.userid + '&type=INSTART')
-        getUserLast = requests.get(self.config.apiPathLogowanie + '?userid=' + self.biezaceLogowanie.userid)
+        getUserFirst = requests.get(self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'] + '&type=INSTART')
+        getUserLast = requests.get(self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'])
 
-        print("Ostatnie logowanie:", self.config.apiPathLogowanie + '?userid=' + self.biezaceLogowanie.userid)
-        print("Pierwsze logowanie: ", self.config.apiPathLogowanie + '?userid=' + self.biezaceLogowanie.userid + '&type=INSTART')
+        print("Ostatnie logowanie:", self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'])
+        print("Pierwsze logowanie: ", self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'] + '&type=INSTART')
 
         user = getUserRequest.json()
         if len(user):
-            self.biezaceLogowanie.userName = user[-1].get('name')
+            self.biezaceLogowanie['userName'] = user[-1].get('name')
 
         self.ostatnieLogowanie = self.calculateLastLogin(getUserLast.json())
         self.pierwszeLogowanie = self.calculateFirstLogin(getUserFirst.json())
 
     def calculateFirstLogin(self, pierwszeLogowanie):
         if len(pierwszeLogowanie):
-            self.biezaceLogowanie.sessionId = pierwszeLogowanie[-1].get('id')
+            self.biezaceLogowanie['sessionId'] = pierwszeLogowanie[-1].get('id')
         else:
-            self.biezaceLogowanie.sessionId = 0
+            self.biezaceLogowanie['sessionId'] = 0
 
     def calculateLastLogin(self, ostatnieLogowanie):
         if len(ostatnieLogowanie):
@@ -71,29 +71,29 @@ class rejestracja:
             print(f"Czas ostatniego: ", czasOstatniegoLogowania)
             print(f"Interwał między logowaniami: ", czas)
 
-            self.biezaceLogowanie.prevId = ostatnieLogowanie[-1].get('id')
+            self.biezaceLogowanie['prevId'] = ostatnieLogowanie[-1].get('id')
             typOstatniegoLogowania = ostatnieLogowanie[-1].get('type')
 
             if typOstatniegoLogowania == "INSTART":
-                self.biezaceLogowanie.typLogowania = "INBREAK"
+                self.biezaceLogowanie['typLogowania'] = "INBREAK"
             elif typOstatniegoLogowania == "INBREAK":
-                self.biezaceLogowanie.typLogowania = "OUTBREAK"
+                self.biezaceLogowanie['typLogowania'] = "OUTBREAK"
             elif typOstatniegoLogowania == "OUTBREAK":
-                self.biezaceLogowanie.typLogowania = "INBREAK"
+                self.biezaceLogowanie['typLogowania'] = "INBREAK"
             elif typOstatniegoLogowania == "OUTEND":
-                self.biezaceLogowanie.typLogowania = "INSTART"
+                self.biezaceLogowanie['typLogowania'] = "INSTART"
 
             if (czas > 600):
-                self.biezaceLogowanie.typLogowania = "OUTEND"
+                self.biezaceLogowanie['typLogowania'] = "OUTEND"
         else:
-            self.biezaceLogowanie.prevId = 0
-            self.biezaceLogowanie.sessionId = 0
+            self.biezaceLogowanie['prevId'] = 0
+            self.biezaceLogowanie['sessionId'] = 0
 
-        print("Ostatnie logowanie: ", self.ostatnieLogowanie)
+        #print("Ostatnie logowanie: ", self.ostatnieLogowanie)
 
     def sendRequestToApi(self):
         try:
-            postRequest = requests.post(self.apiUrlLogowanie, json=self.biezaceLogowanie)
+            postRequest = requests.post(self.config.apiPathLogin, json=self.biezaceLogowanie)
             print(postRequest.status_code)
         except requests.exceptions.RequestException as e:
             print("Błąd logowania: ", e.errno)
