@@ -24,7 +24,6 @@ class rejestracja:
             'machineName': self.config.machineName
         }
 
-        print(f"Biezace logowanie: {self.biezaceLogowanie}")
         self.report()
 
     def report(self):
@@ -91,11 +90,12 @@ class rejestracja:
     def sendRequestToApi(self):
         try:
             postRequest = requests.post(self.config.apiPathLogin, json=self.biezaceLogowanie)
-            print(postRequest.status_code)
         except requests.exceptions.RequestException as e:
             print("Błąd logowania: ", e.errno)
+            return -1
         else:
             self.showNotification()
+            return postRequest.status_code
 
         self.log = ""
 
@@ -124,6 +124,7 @@ class rejestracja:
             timeout=0,
             app_name="Plum!"
         )
+        return 0
 
     def timeInterval(self, d1, d2):
         d1 = datetime.strptime(d1, "%Y-%m-%d %H:%M:%S")
