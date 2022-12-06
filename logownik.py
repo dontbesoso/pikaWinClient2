@@ -30,7 +30,7 @@ class logownik(QWidget):
         self.setLayout(ukladOkna)
 
         self.setFixedSize(400, 130)
-        self.setWindowTitle("Plum 0.4")
+        self.setWindowTitle("Plum 0.5")
 
         self.setWindowIcon(QtGui.QIcon("plum.ico"))
         self.show()
@@ -41,6 +41,5 @@ class logownik(QWidget):
 
         if pattern.match(inputText):
             rejestracja(inputText)
-
 
         self.inputCard.setText('')

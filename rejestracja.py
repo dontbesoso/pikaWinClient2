@@ -8,27 +8,32 @@ class rejestracja:
 
         self.config = Config()
         self.report_method = report_method
-        self.now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.now = datetime.now()
 
         self.txt_log = ""
-        self.filename = f"inlog-{self.now[:10]}"
+        self.filename = "inlog-" + self.now.strftime("%Y-%m-%d %H:%M:%S")[:10]
 
         self.biezaceLogowanie = {
             'id': 0,
             'userid': cardKey,
             'userName': cardKey,
-            'timeIn': self.now,
+            'timeIn': self.now.strftime("%Y-%m-%d %H:%M:%S"),
             'type': "INSTART",
             'prevId': 0,
             'sessionId': 0,
             'machineName': self.config.machineName
         }
 
+        self.requestCode = self.getUserInfoFromApi()
+
+        if len(self.user):
+            self.biezaceLogowanie['userName'] = self.user[-1].get('name')
+
         self.report()
 
     def report(self):
         if self.report_method == "file":
-            #self.getUserInfoFromApi();
+            self.getUserInfoFromApi();
             self.sendRequestToFile()
 
         if self.report_method == "api":
@@ -39,20 +44,16 @@ class rejestracja:
 
     def getUserInfoFromApi(self):
         getUserRequest = requests.get(self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie['userid'])
-        print("Api o użytkonwiku: ", self.config.apiPathUser + '?cardId=' + self.biezaceLogowanie['userid'])
 
+        self.user = getUserRequest.json()
+        return getUserRequest.status_code
+
+    def getUserTimes(self):
         getUserFirst = requests.get(self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'] + '&type=INSTART')
         getUserLast = requests.get(self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'])
 
-        print("Ostatnie logowanie:", self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'])
-        print("Pierwsze logowanie: ", self.config.apiPathLogin + '?userid=' + self.biezaceLogowanie['userid'] + '&type=INSTART')
-
-        user = getUserRequest.json()
-        if len(user):
-            self.biezaceLogowanie['userName'] = user[-1].get('name')
-
-        self.ostatnieLogowanie = self.calculateLastLogin(getUserLast.json())
         self.pierwszeLogowanie = self.calculateFirstLogin(getUserFirst.json())
+        self.ostatnieLogowanie = self.calculateLastLogin(getUserLast.json())
 
     def calculateFirstLogin(self, pierwszeLogowanie):
         if len(pierwszeLogowanie):
@@ -64,10 +65,6 @@ class rejestracja:
         if len(ostatnieLogowanie):
             czasOstatniegoLogowania = ostatnieLogowanie[-1].get('timeIn')
             czas = self.timeInterval(self.now, czasOstatniegoLogowania)
-
-            print(f"Czas logowania: ", self.now)
-            print(f"Czas ostatniego: ", czasOstatniegoLogowania)
-            print(f"Interwał między logowaniami: ", czas)
 
             self.biezaceLogowanie['prevId'] = ostatnieLogowanie[-1].get('id')
             typOstatniegoLogowania = ostatnieLogowanie[-1].get('type')
@@ -81,7 +78,7 @@ class rejestracja:
             elif typOstatniegoLogowania == "OUTEND":
                 self.biezaceLogowanie['typLogowania'] = "INSTART"
 
-            if (czas > 600):
+            if (czas > 43200): #12h * 60' * 60''
                 self.biezaceLogowanie['typLogowania'] = "OUTEND"
         else:
             self.biezaceLogowanie['prevId'] = 0
@@ -91,7 +88,6 @@ class rejestracja:
         try:
             postRequest = requests.post(self.config.apiPathLogin, json=self.biezaceLogowanie)
         except requests.exceptions.RequestException as e:
-            print("Błąd logowania: ", e.errno)
             return -1
         else:
             self.showNotification()
@@ -103,10 +99,8 @@ class rejestracja:
         self.txt_log = self.buildTextLog()
 
         with open(f"{self.filename}.csv", "a+") as f:
-            print("Zapisywany log: ", self.txt_log)
             print(self.txt_log, file=f)
 
-        print(f"[+] Zapisano w pliku: {self.filename}.csv")
         self.txt_log = ""
 
     def buildTextLog(self):
@@ -129,7 +123,7 @@ class rejestracja:
     def timeInterval(self, d1, d2):
         d1 = datetime.strptime(d1, "%Y-%m-%d %H:%M:%S")
         d2 = datetime.strptime(d2, "%Y-%m-%d %H:%M:%S")
-        return abs((d2 - d1).total_seconds() / 60)
+        return (d2 - d1).total_seconds()
 
 
 
