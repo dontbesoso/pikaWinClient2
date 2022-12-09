@@ -2,7 +2,7 @@ import unittest
 from rejestracja import rejestracja
 from datetime import datetime, timedelta
 
-class MyTestCase(unittest.TestCase):
+class mojeTesty(unittest.TestCase):
 
     def test_interwalCzasu_1(self):
         testowaRejestracja = rejestracja("1", "file")
@@ -57,6 +57,12 @@ class MyTestCase(unittest.TestCase):
         Czy w testach mogę powołać obiekt globalny i się do niego odnosić?
             Sceanriusz: testy powołują nowy obiekt globalny rejestracji.
             Każdy kolejny test powołuje obiekt lokalny, który powinien pasować do globalnego(?)  
+            
+        Klasa rejestracja konstruuje obiekt zawierający informacje o logowaniu.
+        Requesty zajmują znikome miejsce w tej zabawie.
+        Czy wyodrębniać requesty do osobnej klasy?
+        
+        Co to jest coverage?
         
         """
 
